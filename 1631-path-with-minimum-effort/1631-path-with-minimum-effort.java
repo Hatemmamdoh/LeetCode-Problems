@@ -9,80 +9,59 @@ class Solution {
             cost = _cost ;
         }
     }
+public  class pair {
+        int x ;
+        int y ;
+        Integer diff ;
+
+        pair(int x , int y , Integer diff){
+            this.x = x ;
+            this.y  = y;
+            this.diff = diff;
+        }
+    }
 
      ArrayList<ArrayList<Node>> adj  ;
     public int minimumEffortPath(int[][] heights){
-        
-        initializeGraph (heights) ;
-        return (dijkstra(heights,heights.length)) ;
-    }
-    
-    public void initializeGraph (int [][] heights){
-
-       adj = new ArrayList<>() ;
-        int cols = heights[0].length ;
         int [][] directions = {{-1,0} , {1,0} , {0,1}, {0,-1}} ;
-        int n = heights.length ;
-        for (int i = 0; i < n*cols ; i++) {
-            adj.add(new ArrayList<>());
-        }
-
-        for (int i = 0 ; i < heights.length ; i++){
-            for (int j = 0 ; j < heights[0].length ; j++){
-                for(int k = 0 ; k < 4 ; k++){
-                    int dx = i+directions[k][0] ;
-                    int dy = j+directions[k][1] ;
-
-                    if (dx >= 0 && dx < heights.length && dy >= 0 && dy < heights[0].length ){
-                        adj.get(i*cols+j).add(new Node(dx*cols+dy,Math.abs(heights[i][j]-heights[dx][dy]))) ;
-                    }
-                }
-            }
-        }
-    }
-   public int dijkstra(int [][] heights, int n) {
-      
-
+        int row = heights.length ;
         int cols = heights[0].length ;
 
-        boolean[] visitedVertex = new boolean[n*cols];
-        int [] distance = new int[n*cols];
-        for (int i = 0; i < heights.length; i++) {
-            for (int j = 0 ; j < cols ; j++ ){
-                visitedVertex[i*cols+j] = false;
-                distance[i*cols+j] = Integer.MAX_VALUE;
-            }
+        int [][] d = new int[row][cols];
+
+        for (int[] each : d){
+            Arrays.fill(each,Integer.MAX_VALUE);
         }
-        distance[0] = 0 ;
-        for (int i = 0 ; i < heights.length*cols ; i++){
-            int u = findMinDistance(distance, visitedVertex);
-            if (u == -1)
-                return -1 ;
-            visitedVertex[u] = true;
-
-            for (int v = 0; v < adj.get(u).size(); v++) {
-                if (!visitedVertex[adj.get(u).get(v).to] ) {
-                    int mx = Math.max(distance[u] , adj.get(u).get(v).cost);
-                    if (distance[adj.get(u).get(v).to] > mx ){
-                        distance[adj.get(u).get(v).to] = mx ;
-
+        d[0][0] = 0;
+        PriorityQueue<pair> queue = new PriorityQueue<pair>((a, b) -> (a.diff.compareTo(b.diff)));
+        boolean[][] visited = new boolean[row][cols];
+        queue.add(new pair(0, 0, d[0][0]));
+        while (!queue.isEmpty()){
+            pair cur = queue.poll() ;
+            int x = cur.x ;
+            int y = cur.y ;
+            int diff = cur.diff ;
+            visited[x][y] = true ;
+            for (int i = 0 ; i < 4 ; i++){
+                int dx = directions[i][0] + x ;
+                int dy = directions[i][1] + y ;
+                if (ok(dx,dy,heights) && !visited[dx][dy]){
+                   int curDiff = Math.abs(heights[dx][dy] - heights[cur.x][cur.y]);
+                   int maxDiff  = Math.max(curDiff,d[x][y]) ;
+                    if (d[dx][dy] > maxDiff) {
+                        d[dx][dy] = maxDiff;
+                        queue.add(new pair(dx, dy, maxDiff));
                     }
                 }
-            }
-        }
 
-        return distance[(heights.length-1) * cols + heights[0].length-1] ;
-    }
-    public static int findMinDistance(int[] distance, boolean[] visitedVertex) {
-        int minDistance = Integer.MAX_VALUE;
-        int minDistanceVertex = -1;
-        for (int i = 0; i < distance.length; i++) {
-            if (!visitedVertex[i] && distance[i] < minDistance) {
-                minDistance = distance[i];
-                minDistanceVertex = i;
             }
         }
-        return minDistanceVertex;
+        return d[row - 1][cols - 1];
     }
+ public Boolean ok(int i, int j,int [][] grid){
+        return (i >= 0 && i < grid.length && j >= 0 && j < grid[0].length );
+    }
+
+    
     
 }
