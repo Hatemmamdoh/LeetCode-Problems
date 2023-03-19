@@ -23,7 +23,7 @@ class Solution {
         }
          for (int i = 0 ; i < root.length ; i++){
             if (root[i] != i){
-                root[i] = root[root[i]] ;
+                root[i] = find (root[i]) ;
             }
             if (!unique.contains(root[i])){
                 unique.add(root[i]) ;
